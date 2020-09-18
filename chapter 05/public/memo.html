@@ -1,0 +1,32 @@
+<!DOCTYPE html>>
+<html>
+    <head>
+        <meta charset = "UTF-8">
+        <title>작성자</title>
+    </head>
+    <body>
+        <form method="post" enctype="multipart/form-data" action="/process/mymemo">
+            <table>
+                <tr>
+                    <td><label>작성자</label></td>
+                    <td><input type="text" name="name"></td>
+                </tr>
+                <tr>
+                    <td><label>작성일시</label></td>
+                    <td><input type="text" name="time"></td>
+                </tr>
+                <tr>
+                    <td><label>내용</label></td>
+                    <td><input type="text" style="width:300px;height:200px;font-size:30px;" name="content"></td>
+                </tr>
+                <tr>
+                    <td><label>사진</label></td>
+                    <td><input type="file" name = "photo"></td>
+                </tr>
+                
+            </table>
+            <input type="submit" value="저장" name ="">
+            <input type="submit" value="닫기" name ="">
+        </form>
+    </body>
+</html>
