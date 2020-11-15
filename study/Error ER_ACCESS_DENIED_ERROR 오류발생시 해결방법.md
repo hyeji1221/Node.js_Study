@@ -16,3 +16,4 @@
 
 ### drop user '유저이름'@'설정한 호스트'; // 위의 방법으로 설정한 호스트는 %
 
+https://www.youtube.com/watch?v=bOkqOJbWPLM
