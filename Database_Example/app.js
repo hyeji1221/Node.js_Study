@@ -19,6 +19,7 @@ app.use(expressSession({
 
 // 데이터베이스
 var mysql = require('mysql');
+const { RSA_SSLV23_PADDING } = require('constants');
 var pool = mysql.createPool({
     connectionLimit : 10,
     host : 'localhost',
@@ -94,6 +95,71 @@ router.route('/process/adduser').post(function(req, res){
         res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
         res.write('<h2>데이터베이스 연결 실패</h2>');
         res.end();
+    }
+});
+var authUser = function(id, password, callback) {
+    console.log('authUser 호출됨.');
+
+    pool.getConnection(function(err, conn) {
+        if (err) {
+            if (conn) {
+                conn.release();
+            }
+            callback(err, null);
+            return;
+        }
+        console.log('데이터베이스 연결 스레드 아이디 : ', + conn.threadId);
+
+        var columns = ['id', 'name', 'age'];
+        var tablename = 'users';
+
+        var exec = conn.query('select ?? from ?? where id=? and password=?', [
+            columns, tablename, id, password
+          ], function(err, rows) {
+            conn.release();
+            console.log('실행 대상 SQL : ' + exec.sql);
+      
+            if (rows.length > 0) {
+              console.log('아이디 [%s], 비밀번호 [%s]가 일치하는 사용자 찾음.', id, password);
+              callback(null, rows);
+            } else {
+              console.log('일치하는 사용자를 찾지 못함');
+              callback(null, null);
+            }
+          });
+      
+        });
+      
+      };
+router.route('/process/login').post(function(req, res){
+    console.log('/process/login 호출됨');
+
+    var paramId = req.body.id || req.query.id;
+    var paramPassword = req.body.password || req.query.password;
+
+    console.log('요청 파라미터 : '+ paramId + ', ' + paramPassword);
+    if (pool) {
+        authUser(paramId, paramPassword, function(err, rows){
+            if (err) {
+                console.log('사용자 로그인 중 오류 발생 : ' + err.stack);
+                res.writeHead('200', {'Content-Type':'text/html:charset=utf8'});
+                res.write('<h2>사용자 로그인 중 오류 발생</h2>');
+                res.write('<p>' + err.stack +'</p>');
+                res.end();
+                return;
+            }
+            if (rows) {
+                console.dir(rows);
+                var username = rows[0].name;
+                res.writeHead('200', {'Content-Type': 'text/html;charset=utf8'});
+                res.write('<h1>로그인 성공</h1>');
+                res.write('<div><p>사용자 아이디 : ' + paramId + '</p></div>');
+                res.write('<div><p>사용자 이름 : ' + username + '</p></div>');
+                res.write(" <br><br><a href='/public/login.html'>다시 로그인하기</a>");
+                res.end();
+
+            }
+        });
     }
 });
 app.use('/', router);
